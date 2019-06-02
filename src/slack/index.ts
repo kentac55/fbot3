@@ -301,7 +301,10 @@ export const registerEventHandlers = (
       const _log = log.child({ event: EventKind.Message })
       _log.info(ev.text)
       const strs = ev.text.replace(/\.$/, '').split(' ')
-      if (strs[0] === 'Reminder:' || strs[0] === 'リマインダー') {
+      if (strs[0] === 'Reminder:') {
+        strs.shift()
+      } else if (strs[0] === 'リマインダー' && strs[1] === ':') {
+        strs.shift()
         strs.shift()
       }
       if (strs[0] !== '$') {
