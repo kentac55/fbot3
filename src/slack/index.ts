@@ -87,7 +87,7 @@ export const registerEventHandlers = (
               {
                 text: `:skull: channel(#${
                   channel.channel.name
-                }) has been archived by @${user.user.name} .`,
+                }) has been archived by @${user.user.name}`,
               },
               msgBase
             )
@@ -119,7 +119,7 @@ export const registerEventHandlers = (
                 {
                   text: `:baby: channel created. #${ev.channel.name} by @${
                     user.user.name
-                  } .`,
+                  }`,
                 },
                 msgBase
               )
@@ -143,7 +143,9 @@ export const registerEventHandlers = (
       const _log = log.child({ event: EventKind.ChannelDeleted })
       const msg: ChatPostMessageArguments = Object.assign(
         {
-          text: `:cop: channel(#${ev.channel}) has been *deleted* by *admin* .`,
+          text: `:cop: channel(id: ${
+            ev.channel
+          }) has been *deleted* by *admin*`,
         },
         msgBase
       )
@@ -186,7 +188,7 @@ export const registerEventHandlers = (
               {
                 text: `:zombie: channel(#${
                   channel.channel.name
-                }) has been unarchived by @${user.user.name} .`,
+                }) has been unarchived by @${user.user.name}`,
               },
               msgBase
             )
