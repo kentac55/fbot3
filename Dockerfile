@@ -9,11 +9,12 @@ RUN go get -u github.com/greymd/ojichat
 FROM node:lts-alpine as node-builder
 WORKDIR /build
 COPY . .
-RUN yarn install --dev
+RUN yarn install
 RUN yarn run build
 
 FROM node:lts-alpine
 WORKDIR /app
+ENV NODE_ENV=production
 COPY --from=go-builder /build/bin/ojichat /bin
 COPY --from=node-builder /build/dist /app/dist
 COPY . .
