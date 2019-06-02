@@ -1,0 +1,39 @@
+{
+  "name": "fbot3",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "compile": "tsc -p .",
+    "exec": "tsc && node dist/index.js",
+    "lint": "eslint --fix src/**.ts && eslint src/**.ts",
+    "precommit": "lint-staged",
+    "watch": "tsc --watch"
+  },
+  "repository": "https://github.com/kentac55/fbot3.git",
+  "author": "kentac55 <dev.kentac55@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/client": "^5.0.1",
+    "https-proxy-agent": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "10",
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.9.0",
+    "@typescript-eslint/typescript-estree": "^1.9.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "husky": "^2.3.0",
+    "lint-staged": "^8.1.7",
+    "prettier": "^1.17.1",
+    "typescript": "3.4"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
+}
