@@ -75,7 +75,7 @@ export type ConnectedEvent = {
   url: string
 }
 
-type Self = {
+export type Self = {
   id: string
   name: string
 }
@@ -120,6 +120,14 @@ export type MemberLeftChannelEvent = Event & {
   channel: string
   channel_type: string
   team: string
+}
+
+export type MessageEvent = Event & {
+  type: EventKind.Message
+  channel: string
+  user: string
+  text: string
+  ts: number
 }
 
 type Item = {

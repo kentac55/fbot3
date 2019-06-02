@@ -15,6 +15,7 @@ export const registerEventHandlers = (
   log: pino.Logger,
   channel: string
 ): void => {
+  let me: models.Self
   const msgBase = {
     channel,
     as_user: true,
@@ -24,6 +25,7 @@ export const registerEventHandlers = (
     EventKind.Authenticated,
     (ev: models.ConnectedEvent): void => {
       const _log = log.child({ event: EventKind.Authenticated })
+      me = ev.self
       _log.info(ev)
     }
   )
