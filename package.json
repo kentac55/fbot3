@@ -15,10 +15,12 @@
   "license": "MIT",
   "dependencies": {
     "@slack/client": "^5.0.1",
-    "https-proxy-agent": "^2.2.1"
+    "https-proxy-agent": "^2.2.1",
+    "pino": "^5.12.6"
   },
   "devDependencies": {
     "@types/node": "10",
+    "@types/pino": "^5.8.7",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "@typescript-eslint/parser": "^1.9.0",
     "@typescript-eslint/typescript-estree": "^1.9.0",
