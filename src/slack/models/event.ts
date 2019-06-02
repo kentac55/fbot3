@@ -1,4 +1,4 @@
-import { EventKind, EmojiEventKind, ItemKind } from './kinds'
+import { EventKind, EmojiEventKind, ItemKind } from '../kinds'
 
 export type Event = {
   type: EventKind
