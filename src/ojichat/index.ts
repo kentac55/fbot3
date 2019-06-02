@@ -11,7 +11,6 @@ export const ojichat = (target: string): Promise<string> => {
           'data',
           (data): void => {
             const str = data.toString()
-            console.log(str)
             stdout.push(str)
           }
         )
