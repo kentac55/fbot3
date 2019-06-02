@@ -29,5 +29,6 @@ module.exports = {
     ],
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/camelcase': 0, // slack-sdkがポンコツ
+    '@typescript-eslint/prefer-interface': 0,
   },
 }
