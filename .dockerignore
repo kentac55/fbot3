@@ -1,0 +1,5 @@
+.envrc
+.git
+dist
+node_modules
+yarn-error.log
