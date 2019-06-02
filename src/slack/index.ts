@@ -47,8 +47,18 @@ export const registerEventHandlers = (
           },
           msgBase
         )
-        web.chat.postMessage(msg)
-        _log.info(msg)
+        web.chat
+          .postMessage(msg)
+          .then(
+            (result: WebAPICallResult): void => {
+              _log.info(result)
+            }
+          )
+          .catch(
+            (e: Error): void => {
+              _log.error(e)
+            }
+          )
       } else if (ev.subtype === EmojiEventKind.Remove) {
         ev.names.forEach(
           (name: string): void => {
@@ -58,8 +68,18 @@ export const registerEventHandlers = (
               },
               msgBase
             )
-            web.chat.postMessage(msg)
-            log.info(msg)
+            web.chat
+              .postMessage(msg)
+              .then(
+                (result: WebAPICallResult): void => {
+                  _log.info(result)
+                }
+              )
+              .catch(
+                (e: Error): void => {
+                  _log.error(e)
+                }
+              )
           }
         )
       } else {
@@ -75,34 +95,52 @@ export const registerEventHandlers = (
       Promise.all([
         web.channels.info({ channel: ev.channel }),
         web.users.info({ user: ev.user }),
-      ]).then(
-        (tuple: [WebAPICallResult, WebAPICallResult]): void => {
-          const [_channel, _user] = tuple
-          const channel = _channel.ok
-            ? (_channel as models.ChannelInfoResult)
-            : null
-          const user = _user.ok ? (_user as models.UserInfoResult) : null
-          if (channel && user) {
-            const msg: ChatPostMessageArguments = Object.assign(
-              {
-                text: `:skull: channel(#${
-                  channel.channel.name
-                }) has been archived by @${user.user.name}`,
-              },
-              msgBase
-            )
-            web.chat.postMessage(msg)
-            _log.info(msg)
-          } else if (channel) {
-            _log.error(`Cannot find user: ${ev.user}`)
-          } else if (user) {
-            _log.error(`Cannot find channel: ${ev.channel}`)
-          } else {
-            _log.error(`Cannot find user: ${ev.user}`)
-            _log.error(`Cannot find channel: ${ev.channel}`)
+      ])
+        .then(
+          (
+            tuple: [WebAPICallResult, WebAPICallResult]
+          ): Promise<ChatPostMessageArguments> => {
+            const [_channel, _user] = tuple
+            const channel = _channel.ok
+              ? (_channel as models.ChannelInfoResult)
+              : null
+            const user = _user.ok ? (_user as models.UserInfoResult) : null
+            if (channel && user) {
+              const msg: ChatPostMessageArguments = Object.assign(
+                {
+                  text: `:skull: channel(#${
+                    channel.channel.name
+                  }) has been archived by @${user.user.name}`,
+                },
+                msgBase
+              )
+              return Promise.resolve(msg)
+            } else if (channel) {
+              return Promise.reject(`Cannot find user: ${ev.user}`)
+            } else if (user) {
+              return Promise.reject(`Cannot find channel: ${ev.channel}`)
+            } else {
+              return Promise.reject(
+                `Cannot find user: ${ev.user} and channel: ${ev.channel}`
+              )
+            }
           }
-        }
-      )
+        )
+        .then(
+          (msg: ChatPostMessageArguments): Promise<WebAPICallResult> => {
+            return web.chat.postMessage(msg)
+          }
+        )
+        .then(
+          (result: WebAPICallResult): void => {
+            _log.info(result)
+          }
+        )
+        .catch(
+          (e: Error): void => {
+            _log.error(e)
+          }
+        )
     }
   )
   rtm.on(
@@ -112,7 +150,7 @@ export const registerEventHandlers = (
       web.users
         .info({ user: ev.channel.creator })
         .then(
-          (_user: WebAPICallResult): void => {
+          (_user: WebAPICallResult): Promise<ChatPostMessageArguments> => {
             const user = _user.ok ? (_user as models.UserInfoResult) : null
             if (user) {
               const msg: ChatPostMessageArguments = Object.assign(
@@ -123,16 +161,25 @@ export const registerEventHandlers = (
                 },
                 msgBase
               )
-              web.chat.postMessage(msg)
-              _log.info(msg)
+              return Promise.resolve(msg)
             } else {
-              _log.error(`Cannot find user: ${ev.channel.creator}`)
+              return Promise.reject(`Cannot find user: ${ev.channel.creator}`)
             }
+          }
+        )
+        .then(
+          (msg: ChatPostMessageArguments): Promise<WebAPICallResult> => {
+            return web.chat.postMessage(msg)
+          }
+        )
+        .then(
+          (result: WebAPICallResult): void => {
+            _log.info(result)
           }
         )
         .catch(
           (e: Error): void => {
-            log.error(e)
+            _log.error(e)
           }
         )
     }
@@ -149,8 +196,18 @@ export const registerEventHandlers = (
         },
         msgBase
       )
-      web.chat.postMessage(msg)
-      _log.info(msg)
+      web.chat
+        .postMessage(msg)
+        .then(
+          (result: WebAPICallResult): void => {
+            _log.info(result)
+          }
+        )
+        .catch(
+          (e: Error): void => {
+            _log.error(e)
+          }
+        )
     }
   )
   rtm.on(
@@ -165,8 +222,18 @@ export const registerEventHandlers = (
         },
         msgBase
       )
-      web.chat.postMessage(msg)
-      _log.info(msg)
+      web.chat
+        .postMessage(msg)
+        .then(
+          (result: WebAPICallResult): void => {
+            _log.info(result)
+          }
+        )
+        .catch(
+          (e: Error): void => {
+            _log.error(e)
+          }
+        )
     }
   )
   rtm.on(
