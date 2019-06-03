@@ -8,8 +8,7 @@ import {
 import pino from 'pino'
 import { EventKind, EmojiEventKind } from './kinds'
 import * as models from './models'
-import { ojichat } from '../ojichat'
-import { isUserID } from './utils'
+import { ojichatCmd } from './cmd'
 
 export const registerEventHandlers = (
   rtm: RTMClient,
@@ -322,75 +321,20 @@ export const registerEventHandlers = (
       } else {
         strs.shift()
       }
+      if (strs.length === 0) {
+        return
+      }
       const cmdResult = async (
-        cmds: string[]
+        args: string[]
       ): Promise<ChatPostMessageArguments> => {
-        switch (cmds.shift()) {
+        switch (args.shift()) {
           case 'ojichat': {
-            return web.channels
-              .info({ channel: _ev.channel })
-              .then(
-                (res: WebAPICallResult): Promise<WebAPICallResult> => {
-                  const channel = res.ok
-                    ? (res as models.ChannelInfoResult)
-                    : null
-                  if (channel === null) {
-                    return Promise.reject(
-                      `failed to fetch channel info(id: ${_ev.channel})`
-                    )
-                  }
-                  const users = channel.channel.members.filter(
-                    (elem: string): boolean => {
-                      return elem !== me.id
-                    }
-                  )
-                  const target = cmds.shift()
-                  if (target && isUserID(target)) {
-                    return web.users.info({
-                      user: target.replace(/<\@(U\w{8})>/, '$1'),
-                    })
-                  } else if (target && target === 'me') {
-                    return web.users.info({ user: _ev.user })
-                  } else {
-                    const targetNum = Math.floor(
-                      Math.random() * Math.floor(users.length)
-                    )
-                    const target = users[targetNum]
-                    return web.users.info({ user: target })
-                  }
-                }
-              )
-              .then(
-                async (
-                  res: WebAPICallResult
-                ): Promise<ChatPostMessageArguments> => {
-                  const user = res.ok ? (res as models.UserInfoResult) : null
-                  if (user === null) {
-                    return Promise.reject(`failed to fetch user info`)
-                  }
-                  const name = user.user.name
-                  const result = await ojichat(name)
-                  const text = result
-                    .replace(new RegExp(`(${name})`), ' @$1 ')
-                    .replace(/裸/, '<CENSORED #8>')
-                  return Promise.resolve({
-                    text,
-                    channel: _ev.channel,
-                    as_user: false,
-                    link_names: true,
-                    username: 'おぢさん',
-                    icon_emoji: ':brain:',
-                  })
-                }
-              )
+            return ojichatCmd(args, web, _ev, me)
           }
           default: {
             return Promise.reject('unmatched')
           }
         }
-      }
-      if (strs.length < 1) {
-        return
       }
       cmdResult(strs)
         .then(
