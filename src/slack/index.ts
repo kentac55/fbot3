@@ -8,7 +8,7 @@ import {
 import pino from 'pino'
 import { EventKind, EmojiEventKind } from './kinds'
 import * as models from './models'
-import { ojichatCmd, helpCmd } from './cmd'
+import { ojichatCmd, helpCmd, versionCmd } from './cmd'
 
 export const registerEventHandlers = (
   rtm: RTMClient,
@@ -331,11 +331,11 @@ export const registerEventHandlers = (
           case 'ojichat': {
             return ojichatCmd(args, web, _ev, me)
           }
-          case 'help': {
-            return helpCmd(_ev)
+          case 'version': {
+            return versionCmd(_ev)
           }
           default: {
-            return Promise.reject('unmatched')
+            return helpCmd(_ev)
           }
         }
       }
