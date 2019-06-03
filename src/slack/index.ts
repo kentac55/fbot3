@@ -327,7 +327,7 @@ export const registerEventHandlers = (
         switch (cmd) {
           case 'ojichat': {
             return web.channels
-              .info({ channel: ev.channel })
+              .info({ channel: _ev.channel })
               .then(
                 (res: WebAPICallResult): Promise<WebAPICallResult> => {
                   const channel = res.ok
@@ -335,7 +335,7 @@ export const registerEventHandlers = (
                     : null
                   if (channel === null) {
                     return Promise.reject(
-                      `failed to fetch channel info(id: ${ev.channel})`
+                      `failed to fetch channel info(id: ${_ev.channel})`
                     )
                   }
                   const users = channel.channel.members.filter(
@@ -365,7 +365,7 @@ export const registerEventHandlers = (
                     .replace(/裸/, '<CENSORED #8>')
                   return Promise.resolve({
                     text,
-                    channel: ev.channel,
+                    channel: _ev.channel,
                     as_user: true,
                     link_names: true,
                   })

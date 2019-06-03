@@ -1,3 +1,5 @@
+import { MessageAttachment } from '@slack/client'
+
 import { EventKind, EmojiEventKind, ItemKind } from '../kinds'
 
 export type Event = {
@@ -124,10 +126,23 @@ export type MemberLeftChannelEvent = Event & {
 
 export type MessageEvent = Event & {
   type: EventKind.Message
+  subtype?: string
+  text: string
+  ts: string
+}
+
+export type UserMessageEvent = MessageEvent & {
+  subtype: undefined
   channel: string
   user: string
-  text: string
-  ts: number
+  edited?: Edited
+  icons?: { [k: string]: string }
+  attachments?: MessageAttachment[]
+}
+
+type Edited = {
+  user: string
+  ts: string
 }
 
 type Item = {
