@@ -9,6 +9,7 @@ import pino from 'pino'
 import { EventKind, EmojiEventKind } from './kinds'
 import * as models from './models'
 import { ojichat } from '../ojichat'
+import { isUserID } from './utils'
 
 export const registerEventHandlers = (
   rtm: RTMClient,
@@ -322,9 +323,9 @@ export const registerEventHandlers = (
         strs.shift()
       }
       const cmdResult = async (
-        cmd: string
+        cmds: string[]
       ): Promise<ChatPostMessageArguments> => {
-        switch (cmd) {
+        switch (cmds.shift()) {
           case 'ojichat': {
             return web.channels
               .info({ channel: _ev.channel })
@@ -343,11 +344,20 @@ export const registerEventHandlers = (
                       return elem !== me.id
                     }
                   )
-                  const targetNum = Math.floor(
-                    Math.random() * Math.floor(users.length)
-                  )
-                  const target = users[targetNum]
-                  return web.users.info({ user: target })
+                  const target = cmds.shift()
+                  if (target && isUserID(target)) {
+                    return web.users.info({
+                      user: target.replace(/<\@(U\w{8})>/, '$1'),
+                    })
+                  } else if (target && target === 'me') {
+                    return web.users.info({ user: _ev.user })
+                  } else {
+                    const targetNum = Math.floor(
+                      Math.random() * Math.floor(users.length)
+                    )
+                    const target = users[targetNum]
+                    return web.users.info({ user: target })
+                  }
                 }
               )
               .then(
@@ -379,11 +389,10 @@ export const registerEventHandlers = (
           }
         }
       }
-      const order = strs.shift()
-      if (!order) {
+      if (strs.length < 1) {
         return
       }
-      cmdResult(order)
+      cmdResult(strs)
         .then(
           (msg: ChatPostMessageArguments): Promise<WebAPICallResult> => {
             return web.chat.postMessage(msg)
