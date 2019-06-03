@@ -366,8 +366,10 @@ export const registerEventHandlers = (
                   return Promise.resolve({
                     text,
                     channel: _ev.channel,
-                    as_user: true,
+                    as_user: false,
                     link_names: true,
+                    username: 'おぢさん',
+                    icon_emoji: ':brain:',
                   })
                 }
               )
