@@ -47,12 +47,28 @@ export const ojichatCmd = async (
   const text = result
     .replace(new RegExp(`(${name})`), ' @$1 ')
     .replace(/裸/, '<CENSORED #8>')
-  return Promise.resolve({
+  return {
     text,
     channel: ev.channel,
     as_user: false,
     link_names: true,
     username: 'おぢさん',
     icon_emoji: ':brain:',
-  })
+  }
+}
+
+export const helpCmd = async (
+  ev: models.UserMessageEvent
+): Promise<ChatPostMessageArguments> => {
+  const text = [
+    'usage:',
+    '  $ ojichat [@target/me]\tcall ojichat',
+    '  $ help\t\t\t\t\tshow this message',
+  ].join('\n')
+  return {
+    text,
+    channel: ev.channel,
+    as_user: true,
+    link_names: true,
+  }
 }
