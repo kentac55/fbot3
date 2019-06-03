@@ -299,7 +299,15 @@ export const registerEventHandlers = (
     EventKind.Message,
     (ev: models.MessageEvent): void => {
       const _log = log.child({ event: EventKind.Message })
-      _log.info(ev.text)
+      _log.info(ev)
+      if (ev.subtype) {
+        return
+      }
+      if (typeof ev.text !== 'string') {
+        console.error(`type of ev.text is ${typeof ev.text}`)
+        return
+      }
+      const _ev = ev as models.UserMessageEvent
       const strs = ev.text.replace(/\.$/, '').split(' ')
       if (strs[0] === 'Reminder:') {
         strs.shift()
