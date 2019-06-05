@@ -9,6 +9,7 @@ import pino from 'pino'
 import { EventKind, EmojiEventKind } from './kinds'
 import * as models from './models'
 import { ojichatCmd, helpCmd, versionCmd } from './cmd'
+import { isUserInfoResult, isUserMessageEvent, isValidTuple } from './utils'
 
 export const registerEventHandlers = (
   rtm: RTMClient,
@@ -16,20 +17,23 @@ export const registerEventHandlers = (
   log: pino.Logger,
   channel: string
 ): void => {
-  let me: models.Self
-  const msgBase = {
+  let me: models.Self // 許せ
+  const msgBase = Object.freeze({
     channel,
     as_user: true,
     link_names: true,
-  }
+  })
+
   rtm.on(
     EventKind.Authenticated,
     (ev: models.ConnectedEvent): void => {
       const _log = log.child({ event: EventKind.Authenticated })
       me = ev.self
+      Object.freeze(me)
       _log.info(ev)
     }
   )
+
   rtm.on(
     EventKind.EmojiChanged,
     (ev: models.EmojiEvent): void => {
@@ -91,6 +95,7 @@ export const registerEventHandlers = (
       }
     }
   )
+
   rtm.on(
     EventKind.ChannelArchive,
     (ev: models.ChannelArchiveEvent): void => {
@@ -101,14 +106,10 @@ export const registerEventHandlers = (
       ])
         .then(
           (
-            tuple: [WebAPICallResult, WebAPICallResult]
-          ): Promise<ChatPostMessageArguments> => {
-            const [_channel, _user] = tuple
-            const channel = _channel.ok
-              ? (_channel as models.ChannelInfoResult)
-              : null
-            const user = _user.ok ? (_user as models.UserInfoResult) : null
-            if (channel && user) {
+            results: [WebAPICallResult, WebAPICallResult]
+          ): Promise<WebAPICallResult> => {
+            if (isValidTuple(results)) {
+              const [channel, user] = results
               const msg: ChatPostMessageArguments = Object.assign(
                 {
                   text: `:skull: channel(#${
@@ -117,10 +118,10 @@ export const registerEventHandlers = (
                 },
                 msgBase
               )
-              return Promise.resolve(msg)
-            } else if (channel) {
+              return web.chat.postMessage(msg)
+            } else if (results[0].ok) {
               return Promise.reject(`Cannot find user: ${ev.user}`)
-            } else if (user) {
+            } else if (results[1].ok) {
               return Promise.reject(`Cannot find channel: ${ev.channel}`)
             } else {
               return Promise.reject(
@@ -130,11 +131,6 @@ export const registerEventHandlers = (
           }
         )
         .then(
-          (msg: ChatPostMessageArguments): Promise<WebAPICallResult> => {
-            return web.chat.postMessage(msg)
-          }
-        )
-        .then(
           (result: WebAPICallResult): void => {
             _log.info(result)
           }
@@ -146,6 +142,7 @@ export const registerEventHandlers = (
         )
     }
   )
+
   rtm.on(
     EventKind.ChannelCreated,
     (ev: models.ChannelCreatedEvent): void => {
@@ -153,9 +150,8 @@ export const registerEventHandlers = (
       web.users
         .info({ user: ev.channel.creator })
         .then(
-          (_user: WebAPICallResult): Promise<ChatPostMessageArguments> => {
-            const user = _user.ok ? (_user as models.UserInfoResult) : null
-            if (user) {
+          (user: WebAPICallResult): Promise<WebAPICallResult> => {
+            if (isUserInfoResult(user)) {
               const msg: ChatPostMessageArguments = Object.assign(
                 {
                   text: `:baby: channel created. #${ev.channel.name} by @${
@@ -164,15 +160,10 @@ export const registerEventHandlers = (
                 },
                 msgBase
               )
-              return Promise.resolve(msg)
+              return web.chat.postMessage(msg)
             } else {
               return Promise.reject(`Cannot find user: ${ev.channel.creator}`)
             }
-          }
-        )
-        .then(
-          (msg: ChatPostMessageArguments): Promise<WebAPICallResult> => {
-            return web.chat.postMessage(msg)
           }
         )
         .then(
@@ -187,6 +178,7 @@ export const registerEventHandlers = (
         )
     }
   )
+
   rtm.on(
     EventKind.ChannelDeleted,
     (ev: models.ChannelDeleted): void => {
@@ -213,6 +205,7 @@ export const registerEventHandlers = (
         )
     }
   )
+
   rtm.on(
     EventKind.ChannelRename,
     (ev: models.ChannelRenameEvent): void => {
@@ -239,6 +232,7 @@ export const registerEventHandlers = (
         )
     }
   )
+
   rtm.on(
     EventKind.ChannelUnarchive,
     (ev: models.ChannelUnarchiveEvent): void => {
@@ -249,14 +243,10 @@ export const registerEventHandlers = (
       ])
         .then(
           (
-            tupled: [WebAPICallResult, WebAPICallResult]
-          ): Promise<ChatPostMessageArguments> => {
-            const [_channel, _user] = tupled
-            const channel = _channel.ok
-              ? (_channel as models.ChannelInfoResult)
-              : null
-            const user = _user.ok ? (_user as models.UserInfoResult) : null
-            if (channel && user) {
+            results: [WebAPICallResult, WebAPICallResult]
+          ): Promise<WebAPICallResult> => {
+            if (isValidTuple(results)) {
+              const [channel, user] = results
               const msg: ChatPostMessageArguments = Object.assign(
                 {
                   text: `:zombie: channel(#${
@@ -265,21 +255,16 @@ export const registerEventHandlers = (
                 },
                 msgBase
               )
-              return Promise.resolve(msg)
-            } else if (channel) {
+              return web.chat.postMessage(msg)
+            } else if (results[0].ok) {
               return Promise.reject(`Cannot find user: ${ev.user}`)
-            } else if (user) {
+            } else if (results[1].ok) {
               return Promise.reject(`Cannot find channel: ${ev.channel}`)
             } else {
               return Promise.reject(
                 `Cannot find user: ${ev.user} and channel: ${ev.channel}`
               )
             }
-          }
-        )
-        .then(
-          (msg: ChatPostMessageArguments): Promise<WebAPICallResult> => {
-            return web.chat.postMessage(msg)
           }
         )
         .then(
@@ -300,61 +285,70 @@ export const registerEventHandlers = (
     (ev: models.MessageEvent): void => {
       const _log = log.child({ event: EventKind.Message })
       _log.info(ev)
-      if (ev.subtype) {
-        return
-      }
-      if (typeof ev.text !== 'string') {
-        console.error(`type of ev.text is ${typeof ev.text}`)
-        return
-      }
-      const _ev = ev as models.UserMessageEvent
-      const strs = ev.text.replace(/\.$/, '').split(' ')
-      if (strs[0] === 'Reminder:') {
-        strs.shift()
-      } else if (strs[0] === 'リマインダー' && strs[1] === ':') {
-        strs.shift()
-        strs.shift()
-      }
-      if (strs[0] !== '$') {
-        _log.info('not cmd message')
-        return
-      } else {
-        strs.shift()
-      }
-      if (strs.length === 0) {
-        return
-      }
-      const cmdResult = async (
-        args: string[]
-      ): Promise<ChatPostMessageArguments> => {
-        switch (args.shift()) {
-          case 'ojichat': {
-            return ojichatCmd(args, web, _ev, me)
-          }
-          case 'version': {
-            return versionCmd(_ev)
-          }
-          default: {
-            return helpCmd(_ev)
-          }
+
+      if (isUserMessageEvent(ev)) {
+        if (typeof ev.text !== 'string') {
+          console.error(`type of ev.text is ${typeof ev.text}`)
+          return
         }
+        const strs = ev.text
+          .replace(/\.$/, '')
+          .replace(/ +/g, ' ') // よくある事故の防止
+          .split(' ')
+
+        // handle reminder
+        if (strs[0] === 'Reminder:') {
+          strs.shift()
+        } else if (strs[0] === 'リマインダー' && strs[1] === ':') {
+          strs.shift()
+          strs.shift()
+        }
+
+        // trigger command
+        if (strs[0] === '$') {
+          strs.shift()
+        } else {
+          _log.info('not cmd message')
+          return
+        }
+
+        // handle invalid message
+        if (strs.length === 0) {
+          return
+        }
+
+        _log.info({ parsed: strs, cmd: strs[0], args: strs.slice(1) })
+        ;(async (args: string[]): Promise<ChatPostMessageArguments> => {
+          switch (args.shift()) {
+            case 'ojichat': {
+              return ojichatCmd(args, web, ev, me)
+            }
+            case 'version': {
+              return versionCmd(ev)
+            }
+            default: {
+              return helpCmd(ev)
+            }
+          }
+        })(strs)
+          .then(
+            (msg: ChatPostMessageArguments): Promise<WebAPICallResult> => {
+              return web.chat.postMessage(msg)
+            }
+          )
+          .then(
+            (result: WebAPICallResult): void => {
+              _log.info(result)
+            }
+          )
+          .catch(
+            (e: Error): void => {
+              _log.error(e)
+            }
+          )
+      } else {
+        return
       }
-      cmdResult(strs)
-        .then(
-          (msg: ChatPostMessageArguments): Promise<WebAPICallResult> => {
-            return web.chat.postMessage(msg)
-          }
-        )
-        .then(
-          (result: WebAPICallResult): void => {
-            _log.info(result)
-          }
-        )
-        .catch(
-          (e: Error): void => {
-            _log.error(e)
-          }
-        )
     }
   )
 }

@@ -124,20 +124,26 @@ export type MemberLeftChannelEvent = Event & {
   team: string
 }
 
-export type MessageEvent = Event & {
+export type MessageEvent = UserMessageEvent | MessageEventWithSubtype
+
+type MessageEventCommon = Event & {
   type: EventKind.Message
   subtype?: string
   text: string
   ts: string
 }
 
-export type UserMessageEvent = MessageEvent & {
-  subtype: undefined
+export type UserMessageEvent = MessageEventCommon & {
   channel: string
+  subtype: undefined
   user: string
   edited?: Edited
   icons?: { [k: string]: string }
   attachments?: MessageAttachment[]
+}
+
+export type MessageEventWithSubtype = MessageEventCommon & {
+  subtype: string
 }
 
 type Edited = {
