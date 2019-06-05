@@ -9,7 +9,7 @@ import {
 
 import * as models from './models'
 import { ojichat } from '../ojichat'
-import { isUserID } from './utils'
+import { isUserID, isChannelInfoResult, isUserInfoResult } from './utils'
 
 export const ojichatCmd = async (
   args: string[],
@@ -17,47 +17,58 @@ export const ojichatCmd = async (
   ev: models.UserMessageEvent,
   me: models.Self
 ): Promise<ChatPostMessageArguments> => {
-  const _channel = await web.channels.info({ channel: ev.channel })
-  const channel = _channel.ok ? (_channel as models.ChannelInfoResult) : null
-  if (channel === null) {
-    return Promise.reject(`failed to fetch channel info(id: ${ev.channel})`)
-  }
-  const _user = await (async (
+  const channel = await web.channels.info({ channel: ev.channel })
+  const user = await (async (
     target: string | undefined
-  ): Promise<WebAPICallResult> => {
-    if (target && isUserID(target)) {
-      return web.users.info({
-        user: target.replace(/<\@(U\w{8})>/, '$1'),
-      })
-    } else if (target && target === 'me') {
-      return web.users.info({ user: ev.user })
+  ): Promise<WebAPICallResult | null> => {
+    if (isChannelInfoResult(channel)) {
+      if (target && isUserID(target)) {
+        return web.users.info({
+          user: target.replace(/<\@(U\w{8})>/, '$1'),
+        })
+      } else if (target && target === 'me') {
+        return web.users.info({ user: ev.user })
+      } else if (target && target === 'rand') {
+        const users = channel.channel.members.filter(
+          (elem: string): boolean => {
+            return elem !== me.id
+          }
+        )
+        const rand = Math.floor(Math.random() * Math.floor(users.length))
+        const target = users[rand]
+        return web.users.info({ user: target })
+      } else {
+        return Promise.resolve(null)
+      }
     } else {
-      const users = channel.channel.members.filter(
-        (elem: string): boolean => {
-          return elem !== me.id
-        }
-      )
-      const rand = Math.floor(Math.random() * Math.floor(users.length))
-      const target = users[rand]
-      return web.users.info({ user: target })
+      return Promise.reject(`failed to fetch channel info(id: ${ev.channel})`)
     }
   })(args.shift())
-  const user = _user.ok ? (_user as models.UserInfoResult) : null
-  if (user === null) {
+  const ojichatArg = ((
+    user: WebAPICallResult | null
+  ): string | null | undefined => {
+    if (user === null) {
+      return null
+    } else if (isUserInfoResult(user)) {
+      return user.user.name
+    } else {
+      return undefined
+    }
+  })(user)
+  if (ojichatArg === undefined) {
     return Promise.reject(`failed to fetch user info`)
-  }
-  const name = user.user.name
-  const result = await ojichat(name)
-  const text = result
-    .replace(new RegExp(`(${name})`), ' @$1 ')
-    .replace(/裸/, '<CENSORED #8>')
-  return {
-    text,
-    channel: ev.channel,
-    as_user: false,
-    link_names: true,
-    username: 'おぢさん',
-    icon_emoji: ':brain:',
+  } else {
+    const text = (await ojichat(ojichatArg))
+      .replace(/裸/, '<CENSORED #8>')
+      .replace(new RegExp(`(${ojichatArg})`), ' @$1 ')
+    return {
+      text,
+      channel: ev.channel,
+      as_user: false,
+      link_names: true,
+      username: 'おぢさん',
+      icon_emoji: ':brain:',
+    }
   }
 }
 

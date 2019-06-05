@@ -1,9 +1,9 @@
 import * as cp from 'child_process'
 
-export const ojichat = (target: string): Promise<string> => {
+export const ojichat = (target: string | null): Promise<string> => {
   return new Promise(
     (resolve, reject): void => {
-      const t: cp.ChildProcess = cp.spawn('ojichat', [target])
+      const t: cp.ChildProcess = cp.spawn('ojichat', target ? [target] : [])
       const stdout: string[] = []
       const stderr: string[] = []
       if (t.stdout) {
