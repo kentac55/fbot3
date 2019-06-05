@@ -43,7 +43,7 @@ export const ojichatCmd = async (
     } else {
       return Promise.reject(`failed to fetch channel info(id: ${ev.channel})`)
     }
-  })(args.shift())
+  })(args[0])
   const ojichatArg = ((
     user: WebAPICallResult | null
   ): string | null | undefined => {
@@ -97,10 +97,11 @@ export const helpCmd = async (
   const text = [
     '```',
     'active skills:',
-    '  $ ojichat [me/rand/@target]',
+    '  $ ojichat [me/rand/@target] [-c <number>]',
     '    summon Ojisan(40yo) for [NPC(default), you, @target(NSFW), random member in this channel(NSFW)]',
-    '  $ version show version',
-    '  $ help    show this message',
+    '    example: `ojicaht rand -c 100` => repeat ojichat(incl lottery) for random member 100 times',
+    '  $ version [-c <number>]show version',
+    '  $ help [-c <number>]   show this message',
     'passive skills:',
     '  - notify emoji event',
     '  - notify channel event',

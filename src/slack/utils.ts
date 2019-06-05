@@ -38,3 +38,13 @@ export const isValidTuple = (
     ) === [true]
   )
 }
+
+export type A1<T> = [T, ...T[]]
+
+export const isOneOrMore = <T>(a: T[]): a is A1<T> => {
+  return a.length > 0
+}
+
+export const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve): NodeJS.Timeout => setTimeout(resolve, ms))
+}
