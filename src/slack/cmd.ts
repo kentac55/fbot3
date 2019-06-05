@@ -95,13 +95,16 @@ export const helpCmd = async (
   ev: models.UserMessageEvent
 ): Promise<ChatPostMessageArguments> => {
   const text = [
+    '```',
     'active skills:',
-    '  $ ojichat [@target/me]\tcall ojichat:heart: for random/@target/you',
-    '  $ version\t\t\t\t show version',
-    '  $ help\t\t\t\t\tshow this message',
+    '  $ ojichat [me/rand/@target]',
+    '    summon Ojisan(40yo) for [NPC(default), you, @target(NSFW), random member in this channel(NSFW)]',
+    '  $ version show version',
+    '  $ help    show this message',
     'passive skills:',
     '  - notify emoji event',
     '  - notify channel event',
+    '```',
     // '',
     // 'https://github.com/kentac55/fbot3',
   ].join('\n')
