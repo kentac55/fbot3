@@ -100,6 +100,8 @@ export const helpCmd = async (
     'passive skills:',
     '  - notify emoji event',
     '  - notify channel event',
+    '  - notify member join event(global skill)',
+    '  - notify member left event(global skill)',
     '```',
     // '',
     // 'https://github.com/kentac55/fbot3',

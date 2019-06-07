@@ -12,6 +12,7 @@ import * as models from './models'
 import { ojichatCmd, helpCmd, versionCmd } from './cmd'
 import {
   A1,
+  isChannelInfoResult,
   isOneOrMore,
   isUserInfoResult,
   isUserMessageEvent,
@@ -436,6 +437,89 @@ export const registerEventHandlers = (
       } else {
         return
       }
+    }
+  )
+
+  rtm.on(
+    EventKind.MemberJoinedChannel,
+    (ev: models.MemberJoinedChannelEvent): void => {
+      const _log = log.child({ event: EventKind.MemberJoinedChannel })
+      web.users
+        .info({ user: ev.user })
+        .then(
+          (user: WebAPICallResult): Promise<WebAPICallResult> => {
+            if (isUserInfoResult(user)) {
+              const msg: ChatPostMessageArguments = {
+                text: `:+1: Weblcome @${user.user.name}`,
+                channel: ev.channel,
+                as_user: true,
+                link_names: true,
+              }
+              return web.chat.postMessage(msg)
+            } else {
+              return Promise.reject(`Cannot find user: ${ev.user}`)
+            }
+          }
+        )
+        .then(
+          (result: WebAPICallResult): void => {
+            _log.info(result)
+          }
+        )
+        .catch(
+          (e: Error): void => {
+            _log.error(e)
+          }
+        )
+    }
+  )
+
+  rtm.on(
+    EventKind.MemberLeftChannel,
+    (ev: models.MemberLeftChannelEvent): void => {
+      const _log = log.child({ event: EventKind.MemberLeftChannel })
+      web.channels
+        .info({ channel: ev.channel })
+        .then(
+          (channel): Promise<[WebAPICallResult, WebAPICallResult]> => {
+            if (isChannelInfoResult(channel)) {
+              return Promise.all([
+                web.users.info({ user: channel.channel.creator }),
+                web.users.info({ user: ev.user }),
+              ])
+            } else {
+              return Promise.reject(`Cannot find channel: ${ev.channel}`)
+            }
+          }
+        )
+        .then(
+          (results): Promise<WebAPICallResult> => {
+            if (isUserInfoResult(results[0]) && isUserInfoResult(results[1])) {
+              const [creator, target] = results
+              const msg: ChatPostMessageArguments = {
+                text: `:loudspeaker: @${creator.user.name} 抜け忍を検知 => @${
+                  target.user.name
+                }`,
+                channel: ev.channel,
+                as_user: true,
+                link_names: true,
+              }
+              return web.chat.postMessage(msg)
+            } else {
+              return Promise.reject(`Cannot find user: ${ev.user}`)
+            }
+          }
+        )
+        .then(
+          (result: WebAPICallResult): void => {
+            _log.info(result)
+          }
+        )
+        .catch(
+          (e: Error): void => {
+            _log.error(e)
+          }
+        )
     }
   )
 }
