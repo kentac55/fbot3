@@ -450,7 +450,7 @@ export const registerEventHandlers = (
           (user: WebAPICallResult): Promise<WebAPICallResult> => {
             if (isUserInfoResult(user)) {
               const msg: ChatPostMessageArguments = {
-                text: `:+1: Weblcome @${user.user.name}`,
+                text: `:+1: Welcome @${user.user.name}`,
                 channel: ev.channel,
                 as_user: true,
                 link_names: true,
