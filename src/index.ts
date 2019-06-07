@@ -1,8 +1,8 @@
 import { RTMClient, WebClient } from '@slack/client'
 import { CronJob } from 'cron'
+import pino from 'pino'
 
 import { getTokenFromEnv, getClients, getChannel } from './utils'
-import pino from 'pino'
 import { registerEventHandlers } from './slack/index'
 
 const logger = pino()

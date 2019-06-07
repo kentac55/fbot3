@@ -1,11 +1,12 @@
 import {
-  RTMClient,
-  WebClient,
   ChatPostMessageArguments,
   MessageAttachment,
+  RTMClient,
   WebAPICallResult,
+  WebClient,
 } from '@slack/client'
 import pino from 'pino'
+
 import { EventKind, EmojiEventKind } from './kinds'
 import * as models from './models'
 import { ojichatCmd, helpCmd, versionCmd } from './cmd'
@@ -15,6 +16,7 @@ import {
   isUserInfoResult,
   isUserMessageEvent,
   isValidTuple,
+  getVersion,
   sleep,
 } from './utils'
 
@@ -38,6 +40,32 @@ export const registerEventHandlers = (
       me = ev.self
       Object.freeze(me)
       _log.info(ev)
+      getVersion()
+        .then(
+          (data): Promise<WebAPICallResult> => {
+            const msg: ChatPostMessageArguments = Object.assign(
+              {
+                text: `:information_source: ${ev.self.name}(version ${data})`,
+              },
+              msgBase
+            )
+            return web.chat.postMessage(msg)
+          }
+        )
+        .catch(
+          (e): void => {
+            _log.error(e)
+            const msg: ChatPostMessageArguments = Object.assign(
+              {
+                text: `:information_source: ${
+                  ev.self.name
+                }(status: :thinking_face:)`,
+              },
+              msgBase
+            )
+            web.chat.postMessage(msg)
+          }
+        )
     }
   )
 

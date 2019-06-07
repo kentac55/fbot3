@@ -1,4 +1,8 @@
+import * as util from 'util'
+import * as fs from 'fs'
+
 import { WebAPICallResult } from '@slack/client'
+
 import * as models from './models'
 
 export const isUserID = (id: string): boolean => {
@@ -47,4 +51,16 @@ export const isOneOrMore = <T>(a: T[]): a is A1<T> => {
 
 export const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve): NodeJS.Timeout => setTimeout(resolve, ms))
+}
+
+export const getVersion = async (): Promise<string> => {
+  const readFile = util.promisify(fs.readFile)
+  try {
+    const data = await readFile('./package.json', { encoding: 'utf8' })
+    const json = JSON.parse(data)
+    const text = json.version
+    return text
+  } catch (e) {
+    return Promise.reject(e)
+  }
 }

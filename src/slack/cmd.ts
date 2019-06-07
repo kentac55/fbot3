@@ -1,15 +1,17 @@
-import * as util from 'util'
-import * as fs from 'fs'
-
 import {
-  WebClient,
   ChatPostMessageArguments,
   WebAPICallResult,
+  WebClient,
 } from '@slack/client'
 
 import * as models from './models'
 import { ojichat } from '../ojichat'
-import { isUserID, isChannelInfoResult, isUserInfoResult } from './utils'
+import {
+  isUserID,
+  isChannelInfoResult,
+  isUserInfoResult,
+  getVersion,
+} from './utils'
 
 export const ojichatCmd = async (
   args: string[],
@@ -75,19 +77,12 @@ export const ojichatCmd = async (
 export const versionCmd = async (
   ev: models.UserMessageEvent
 ): Promise<ChatPostMessageArguments> => {
-  const readFile = util.promisify(fs.readFile)
-  try {
-    const data = await readFile('./package.json', { encoding: 'utf8' })
-    const json = JSON.parse(data)
-    const text = json.version
-    return {
-      text,
-      channel: ev.channel,
-      as_user: true,
-      link_names: true,
-    }
-  } catch (e) {
-    return Promise.reject(e)
+  const text = await getVersion()
+  return {
+    text,
+    channel: ev.channel,
+    as_user: true,
+    link_names: true,
   }
 }
 
