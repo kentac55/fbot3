@@ -1,19 +1,11 @@
 import { WebAPICallResult } from '@slack/client'
 
+import { EventKind, ItemKind, FileMode, FileType } from '../kinds'
+
 type Attachment = {
   text: string
   id: number
   fallback: string
-}
-
-type Latest = {
-  text: string
-  username: string
-  bot_id: string
-  attachments: Attachment[]
-  type: string
-  subtype: string
-  ts: string
 }
 
 type Topic = {
@@ -43,7 +35,7 @@ type Channel = {
   is_private: boolean
   is_mpim: boolean
   last_read: string
-  latest: Latest
+  latest: Message
   unread_count: number
   unread_count_display: number
   members: string[]
@@ -53,22 +45,34 @@ type Channel = {
 }
 
 export type ChannelInfoResult = WebAPICallResult & {
-  ok: boolean
+  ok: true
   channel: Channel
 }
 
 type Message = {
+  // 固定
+  type: EventKind.Message
+  channel: string
   text: string
-  username: string
-  bot_id: string
-  attachments: Attachment[]
-  type: string
-  subtype: string
   ts: string
+
+  // 変動
+  // TODO: use Kind
+  subtype?: string
+  attachments?: Attachment[]
+  bot_id?: string
+  deleted_ts?: string
+  event_ts?: string
+  hidden?: boolean
+  is_starred?: boolean
+  pinned_to?: string[]
+  reactions?: Reaction[]
+  user?: string // if (!bot_id)
+  username?: string // if (bot_id)
 }
 
 export type ChatPostMessageResult = WebAPICallResult & {
-  ok: boolean
+  ok: true
   channel: string
   ts: string
   message: Message
@@ -116,6 +120,147 @@ type User = {
 }
 
 export type UserInfoResult = WebAPICallResult & {
-  ok: boolean
+  ok: true
   user: User
+}
+
+export type ReactionListResult = WebAPICallResult & {
+  ok: true
+  items: ReacttionListItem[]
+  response_metadata: ResponseMetadata
+}
+
+export type ReacttionListItem =
+  | ReactionItemFile
+  | ReactionItemFileComment
+  | ReactionItemMessage
+
+export type ReactionItemFile = {
+  file: File
+  type: ItemKind.File
+}
+
+export type ReactionItemFileComment = {
+  comment: FileComment
+  file: File
+}
+
+export type ReactionItemMessage = {
+  type: ItemKind.Message
+  channel: string
+  message: Message
+}
+
+type FileComment = {
+  type: string
+  comment: string
+  created: number
+  id: string
+  reactions: Reaction[]
+  timestamp: number
+  user: string
+}
+
+type File = {
+  id: string
+  created: number
+  timestamp: number
+
+  // name may null if the file has no name
+  name: string | null
+  title: string
+  mimetype: string
+  filetype: FileType
+  pretty_type: string
+  user: string
+  editable: boolean
+  size: number
+  mode: FileMode
+  is_external: boolean
+  external_type: string
+  is_public: boolean
+  public_url_shared: boolean
+  display_as_bot: boolean
+  username: string
+  url_private: string
+  url_private_download: string
+
+  // not all file
+  thumb_64?: string
+  thumb_80?: string
+  thumb_360?: string
+  thumb_360_w?: number
+  thumb_360_h?: number
+  thumb_160?: string
+  thumb_360_gif?: string
+  thumb_480?: string
+  thumb_720?: string
+  thumb_960?: string
+  thumb_1024?: string
+
+  // only image files
+  image_exif_rotation?: number
+  original_w?: number
+  original_h?: number
+  deanimate_gif?: string
+  pjpeg?: string
+
+  permalink: string
+  permalink_public: string
+
+  // appear if mode is snippet or post
+  edit_link?: string
+
+  // Previews
+  preview?: string
+  preview_highlight?: string
+  lines?: string
+  lines_more?: string
+
+  comments_count: number
+  is_starred: boolean
+
+  // appear if someone have sttard
+  num_stars?: number
+
+  shares: Shares
+  channels: string[]
+  groups: string[]
+  ims: string[]
+  has_rich_preview: boolean
+
+  pinned_to?: string[] // channelID
+
+  reactions?: Reaction[]
+
+  initial_comment?: string
+}
+
+type Shares = {
+  public: Public
+}
+
+type Public = {
+  [key: string]: SharedInChannel[]
+}
+
+type SharedInChannel = {
+  reply_users: string[]
+  reply_users_count: number
+  reply_count: number
+  ts: string
+  thread_ts: string
+  latest_reply: string
+  channel_name: string
+  team_id: string
+}
+
+type Reaction = {
+  name: string
+  count: number
+  users: string[]
+}
+
+type ResponseMetadata = {
+  next_cursor: string
 }
