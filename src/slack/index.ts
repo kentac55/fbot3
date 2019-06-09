@@ -7,12 +7,13 @@ import {
 } from '@slack/client'
 import pino from 'pino'
 
-import { EventKind, EmojiEventKind } from './kinds'
+import { EventKind, EmojiEventKind, FileType } from './kinds'
 import * as models from './models'
 import { ojichatCmd, reactionListCmd, helpCmd, versionCmd } from './cmd'
 import {
   A1,
   isChannelInfoResult,
+  isFileInfoResult,
   isOneOrMore,
   isUserInfoResult,
   isUserMessageEvent,
@@ -520,6 +521,44 @@ export const registerEventHandlers = (
         )
         .catch(
           (e: Error): void => {
+            _log.error(e)
+          }
+        )
+    }
+  )
+
+  rtm.on(
+    EventKind.FileCreated,
+    (ev: models.FileCreated): void => {
+      const _log = log.child({ event: EventKind.FileCreated })
+      const blackList = [FileType.Xls]
+      web.files
+        .info({ file: ev.file_id })
+        .then(
+          (file: WebAPICallResult): Promise<WebAPICallResult> => {
+            if (
+              isFileInfoResult(file) &&
+              blackList.some((v): boolean => v === file.file.filetype)
+            ) {
+              const msg: ChatPostMessageArguments = Object.assign(
+                {
+                  text: `:warning: ${file.file.permalink}`,
+                },
+                msgBase
+              )
+              return web.chat.postMessage(msg)
+            } else {
+              return Promise.reject(`not match`)
+            }
+          }
+        )
+        .then(
+          (res): void => {
+            _log.info(res)
+          }
+        )
+        .catch(
+          (e): void => {
             _log.error(e)
           }
         )

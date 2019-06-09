@@ -51,6 +51,12 @@ export const isReactionListResult = (
   return result.ok
 }
 
+export const isFileInfoResult = (
+  result: WebAPICallResult
+): result is models.FileInfoResult => {
+  return result.ok
+}
+
 export type A1<T> = [T, ...T[]]
 
 export const isOneOrMore = <T>(a: T[]): a is A1<T> => {

@@ -49,6 +49,11 @@ export type ChannelInfoResult = WebAPICallResult & {
   channel: Channel
 }
 
+export type FileInfoResult = WebAPICallResult & {
+  ok: true
+  file: File
+}
+
 type Message = {
   // 固定
   type: EventKind.Message

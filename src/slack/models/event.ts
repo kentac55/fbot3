@@ -173,3 +173,13 @@ export type ReactionAddedEvent = ReactionEvent & {
 export type ReactionRemovedEvent = Event & {
   type: EventKind.ReactionRemoved
 }
+
+export type FileCreated = Event & {
+  type: EventKind.FileCreated
+  file_id: string
+  file: ID
+}
+
+type ID = {
+  id: string
+}
