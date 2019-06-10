@@ -249,7 +249,7 @@ export const registerEventHandlers = (
       const _log = log.child({ event: EventKind.ChannelRename })
       const msg: ChatPostMessageArguments = Object.assign(
         {
-          text: `:writing_hand: one channel has been renamed to #${
+          text: `:writing_hand: a channel has been renamed to #${
             ev.channel.name
           }`,
         },
