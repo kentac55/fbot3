@@ -165,7 +165,7 @@ export const reactionListCmd = async (
     return {
       text,
       channel: ev.channel,
-      as_user: false,
+      as_user: true,
       link_names: true,
     }
   } else {
