@@ -89,7 +89,7 @@ export const reactionListCmd = async (
   ): Promise<WebAPICallResult> => {
     if (target && isUserID(target)) {
       return web.users.info({
-        user: target.replace(/<\@(U\w{8})>/, '$1'),
+        user: target.replace(/<\@(U\w{8})(|.+)?>/, '$1'),
       })
     } else {
       return web.users.info({ user: ev.user })

@@ -8,7 +8,7 @@ import * as models from './models'
 import { ItemKind } from './kinds'
 
 export const isUserID = (id: string): boolean => {
-  if (id.match(/<\@U\w{8}>/)) {
+  if (id.match(/<\@U\w{8}(|.+)?>/)) {
     return true
   } else {
     return false
