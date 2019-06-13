@@ -41,3 +41,9 @@ export const getClients = (token: string): [RTMClient, WebClient] => {
   }
   return [new RTMClient(token), new WebClient(token)]
 }
+
+export type A1<T> = [T, ...T[]]
+
+export const isOneOrMore = <T>(a: T[]): a is A1<T> => {
+  return a.length > 0
+}

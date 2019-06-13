@@ -3,8 +3,8 @@ import * as fs from 'fs'
 
 import { WebAPICallResult } from '@slack/client'
 
+import { A1, isOneOrMore } from '../utils'
 import * as models from './models'
-
 import { ItemKind } from './kinds'
 
 export const isUserID = (id: string): boolean => {
@@ -56,7 +56,6 @@ export const isFileInfoResult = (
 ): result is models.FileInfoResult => {
   return result.ok
 }
-
 export const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve): NodeJS.Timeout => setTimeout(resolve, ms))
 }
@@ -116,8 +115,77 @@ export const reminderHandler = (strs: string[]): string[] => {
   return strs
 }
 
-export type A1<T> = [T, ...T[]]
+export const extractCount = (strs: A1<string>): [A1<string>, number] => {
+  const idx = strs.findIndex(
+    (elem): boolean => {
+      return /\-c/.test(elem)
+    }
+  )
 
-export const isOneOrMore = <T>(a: T[]): a is A1<T> => {
-  return a.length > 0
+  // default value
+  if (idx === -1) {
+    return [strs, 1]
+  }
+
+  const head = strs.slice(0, idx)
+  const tail = strs.slice(idx + 2, strs.length)
+  head.push.apply(head, tail)
+
+  if (isOneOrMore(head)) {
+    try {
+      return [head, parseInt(strs[idx + 1])]
+    } catch {
+      return [head, 1]
+    }
+  } else {
+    // つかれた(明らかに手抜きだが、摩擦はないものとする)
+    try {
+      return [strs, parseInt(strs[idx + 1])]
+    } catch {
+      return [strs, 1]
+    }
+  }
+}
+
+export const parse = (str: string): Command => {
+  const invalidCommand: InvalidCommand = {
+    isCmd: false,
+    input: str,
+  }
+
+  const formatted = reminderHandler(trim(str).split(' '))
+  if (formatted[0] === '$') {
+    formatted.shift()
+  } else {
+    return invalidCommand
+  }
+
+  if (!isOneOrMore(formatted)) {
+    return invalidCommand
+  }
+
+  const [strs, runs] = extractCount(formatted)
+
+  return {
+    isCmd: true,
+    input: str,
+    cmd: strs[0],
+    args: strs.slice(1),
+    runs,
+  }
+}
+
+export type Command = ValidCommand | InvalidCommand
+
+export type InvalidCommand = {
+  isCmd: false
+  input: string
+}
+
+export type ValidCommand = {
+  isCmd: true
+  input: string
+  cmd: string
+  args: string[]
+  runs: number
 }

@@ -11,17 +11,15 @@ import { EventKind, EmojiEventKind, FileType } from './kinds'
 import * as models from './models'
 import { ojichatCmd, reactionListCmd, helpCmd, versionCmd } from './cmd'
 import {
-  A1,
+  ValidCommand,
+  getVersion,
   isChannelInfoResult,
   isFileInfoResult,
-  isOneOrMore,
   isUserInfoResult,
   isUserMessageEvent,
   isValidTuple,
-  getVersion,
-  reminderHandler,
+  parse,
   sleep,
-  trim,
 } from './utils'
 
 export const registerEventHandlers = (
@@ -334,70 +332,21 @@ export const registerEventHandlers = (
         return
       }
 
-      const strs = reminderHandler(trim(ev.text).split(' '))
+      const cmd = parse(ev.text)
 
-      // trigger command
-      if (strs[0] === '$') {
-        strs.shift()
-      } else {
-        _log.info('not cmd message')
-        return
-      }
-
-      // handle invalid message
-      if (!isOneOrMore(strs)) {
-        return
-      }
-
-      const runs = ((strs: A1<string>): [A1<string>, number] => {
-        const idx = strs.findIndex(
-          (elem): boolean => {
-            return /\-c/.test(elem)
-          }
-        )
-        if (idx === -1) {
-          return [strs, 1]
-        } else {
-          const head = strs.slice(0, idx)
-          const tail = strs.slice(idx + 2, strs.length)
-          head.push.apply(head, tail)
-          if (isOneOrMore(head)) {
-            try {
-              return [head, parseInt(strs[idx + 1])]
-            } catch {
-              return [head, 1]
-            }
-          } else {
-            // つかれた
-            try {
-              return [strs, parseInt(strs[idx + 1])]
-            } catch {
-              return [strs, 1]
-            }
-          }
-        }
-      })(strs)
-
-      _log.info({
-        parsed: strs,
-        cmd: runs[0][0],
-        args: runs[0].slice(1),
-        runs: runs[1],
-      })
+      _log.info(cmd)
 
       async function* execute(
-        cmd: string,
-        args: string[],
-        ev: models.UserMessageEvent,
-        count: number
+        cmd: ValidCommand,
+        ev: models.UserMessageEvent
       ): AsyncIterableIterator<WebAPICallResult> {
-        let i = 0
-        while (i < count) {
+        let i = 0 // 許せ
+        while (i < cmd.runs) {
           i++
           const msg = await (async (
             args: string[]
           ): Promise<ChatPostMessageArguments> => {
-            switch (cmd) {
+            switch (cmd.cmd) {
               case 'ojichat': {
                 return ojichatCmd(args, web, ev, me)
               }
@@ -411,23 +360,21 @@ export const registerEventHandlers = (
                 return helpCmd(ev)
               }
             }
-          })(args)
+          })(cmd.args)
           yield web.chat.postMessage(msg)
           await sleep(1000)
         }
       }
 
-      if (isOneOrMore(runs[0])) {
+      if (cmd.isCmd) {
         ;(async (
-          cmd: string,
-          args: string[],
-          ev: models.UserMessageEvent,
-          count: number
+          cmd: ValidCommand,
+          ev: models.UserMessageEvent
         ): Promise<void> => {
-          for await (const result of execute(cmd, args, ev, count)) {
+          for await (const result of execute(cmd, ev)) {
             _log.info(result)
           }
-        })(runs[0][0], runs[0].slice(1), ev, runs[1]).catch(
+        })(cmd, ev).catch(
           (e: Error): void => {
             _log.error(e)
           }
