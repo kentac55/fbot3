@@ -57,12 +57,6 @@ export const isFileInfoResult = (
   return result.ok
 }
 
-export type A1<T> = [T, ...T[]]
-
-export const isOneOrMore = <T>(a: T[]): a is A1<T> => {
-  return a.length > 0
-}
-
 export const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve): NodeJS.Timeout => setTimeout(resolve, ms))
 }
@@ -106,4 +100,24 @@ export class Map2<K, V> extends Map<K, V> {
       return v
     }
   }
+}
+
+export const trim = (str: string): string => {
+  return str.replace(/\.$/, '').replace(/ +/g, ' ')
+}
+
+export const reminderHandler = (strs: string[]): string[] => {
+  if (strs[0] === 'Reminder:') {
+    strs.shift()
+  } else if (strs[0] === 'リマインダー' && strs[1] === ':') {
+    strs.shift()
+    strs.shift()
+  }
+  return strs
+}
+
+export type A1<T> = [T, ...T[]]
+
+export const isOneOrMore = <T>(a: T[]): a is A1<T> => {
+  return a.length > 0
 }

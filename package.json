@@ -9,6 +9,7 @@
     "lint": "eslint --fix src/**.ts && eslint src/**.ts",
     "precommit": "lint-staged",
     "start": "node dist/index.js",
+    "test": "jest",
     "watch": "tsc --watch"
   },
   "repository": "https://github.com/kentac55/fbot3.git",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@types/cron": "^1.7.1",
+    "@types/jest": "^24.0.14",
     "@types/node": "10",
     "@types/pino": "^5.8.7",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
@@ -31,8 +33,10 @@
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-prettier": "^3.1.0",
     "husky": "^2.3.0",
+    "jest": "^24.8.0",
     "lint-staged": "^8.1.7",
     "prettier": "^1.17.1",
+    "ts-jest": "^24.0.2",
     "typescript": "3.4"
   },
   "lint-staged": {
