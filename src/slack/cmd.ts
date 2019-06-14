@@ -42,8 +42,8 @@ export const ojichatCmd = async (
           }
         )
         const rand = Math.floor(Math.random() * Math.floor(users.length))
-        const target = users[rand]
-        return web.users.info({ user: target })
+        const user = users[rand]
+        return web.users.info({ user })
       } else {
         return Promise.resolve(null)
       }
