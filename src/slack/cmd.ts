@@ -191,7 +191,7 @@ export const helpCmd = async (
   const text = [
     '```',
     'active skills:',
-    '  $ ojichat [me/rand/@target]',
+    '  $ ojichat [me/@target/rand]',
     '    summon Ojisan for [NPC(default), you, @target(NSFW), random member in this channel(NSFW)]',
     '    example: `ojicaht rand -c 100` => repeat ojichat(incl lottery) for random member 100 times',
     '  $ reaction [@target] (experimental)',
@@ -204,9 +204,9 @@ export const helpCmd = async (
     '  - notify member join event',
     '  - notify member left event',
     '  - notify excel file upload(experimental)',
-    '```',
     // '',
     // 'https://github.com/kentac55/fbot3',
+    '```',
   ].join('\n')
   return {
     text,
