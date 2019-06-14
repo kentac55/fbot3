@@ -17,6 +17,10 @@ steps:
   displayName: 'Run yarn install'
 
 - script: |
+    yarn lint
+  displayName: 'Run yarn lint'
+
+- script: |
     yarn test-ci
   displayName: 'Run yarn test-ci'
 
