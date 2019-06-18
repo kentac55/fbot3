@@ -114,27 +114,21 @@ export const reactionListCmd = async (
           !acc[1].has(x.file.id) && // 重複排除
           x.file.reactions // typeguard
         ) {
-          x.file.reactions.forEach(
-            (elem): void => {
-              acc[0].set(elem.name, acc[0].getOrElse(elem.name, 0) + 1)
-            }
-          )
+          x.file.reactions.forEach((elem): void => {
+            acc[0].set(elem.name, acc[0].getOrElse(elem.name, 0) + 1)
+          })
           acc[1].add(x.file.id)
         } else if (isReactionItemFileComment(x) && !acc[1].has(x.comment.id)) {
-          x.comment.reactions.forEach(
-            (elem): void => {
-              acc[0].set(elem.name, acc[0].getOrElse(elem.name, 0) + 1)
-            }
-          )
+          x.comment.reactions.forEach((elem): void => {
+            acc[0].set(elem.name, acc[0].getOrElse(elem.name, 0) + 1)
+          })
           acc[1].add(x.file.id)
         } else if (isReactionItemMessage(x)) {
           // messageはidが無いのでtsを代用する
           if (x.message.reactions && !acc[1].has(x.message.ts)) {
-            x.message.reactions.forEach(
-              (elem): void => {
-                acc[0].set(elem.name, acc[0].getOrElse(elem.name, 0) + 1)
-              }
-            )
+            x.message.reactions.forEach((elem): void => {
+              acc[0].set(elem.name, acc[0].getOrElse(elem.name, 0) + 1)
+            })
           }
           acc[1].add(x.message.ts)
         }
@@ -152,11 +146,9 @@ export const reactionListCmd = async (
     })(user)
 
     const text = Array.from(map.entries())
-      .sort(
-        (a, b): number => {
-          return b[1] - a[1]
-        }
-      )
+      .sort((a, b): number => {
+        return b[1] - a[1]
+      })
       .slice(0, 10)
       .reduce((acc, x): string => {
         return `${acc}\n:${x[0]}: => ${x[1]}`

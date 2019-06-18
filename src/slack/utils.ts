@@ -116,11 +116,9 @@ export const reminderHandler = (strs: string[]): string[] => {
 }
 
 export const extractCount = (strs: A1<string>): [A1<string>, number] => {
-  const idx = strs.findIndex(
-    (elem): boolean => {
-      return /\-c/.test(elem)
-    }
-  )
+  const idx = strs.findIndex((elem): boolean => {
+    return /\-c/.test(elem)
+  })
 
   // default value
   if (idx === -1) {
