@@ -36,12 +36,8 @@ export const isUserMessageEvent = (
 export const isValidTuple = (
   res: [WebAPICallResult, WebAPICallResult]
 ): res is [models.ChannelInfoResult, models.UserInfoResult] => {
-  return (
-    [isChannelInfoResult(res[0]), isUserInfoResult(res[1])].filter(
-      (elem, idx, self): boolean => {
-        return self.indexOf(elem) === idx
-      }
-    ) === [true]
+  return [isChannelInfoResult(res[0]), isUserInfoResult(res[1])].some(
+    (elem): boolean => elem
   )
 }
 
