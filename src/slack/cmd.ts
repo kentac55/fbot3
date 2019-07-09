@@ -5,7 +5,7 @@ import {
 } from '@slack/client'
 
 import * as models from './models'
-import { ojichat } from '../ojichat'
+import { exec } from '../exec'
 import {
   getVersion,
   isChannelInfoResult,
@@ -65,7 +65,7 @@ export const ojichatCmd = async (
   if (ojichatArg === undefined) {
     return Promise.reject(`failed to fetch user info`)
   } else {
-    const text = (await ojichat(ojichatArg))
+    const text = (await exec('ojichat', ojichatArg ? [ojichatArg] : []))
       .replace(/裸/, '<CENSORED #8>')
       .replace(new RegExp(`(${ojichatArg})`), ' @$1 ')
     return {

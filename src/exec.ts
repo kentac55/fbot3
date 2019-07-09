@@ -1,8 +1,12 @@
 import * as cp from 'child_process'
 
-export const ojichat = (target: string | null): Promise<string> => {
+export const exec = (cmd: string, args: string[]): Promise<string> => {
   return new Promise((resolve, reject): void => {
-    const t: cp.ChildProcess = cp.spawn('ojichat', target ? [target] : [])
+    const t: cp.ChildProcess = cp.spawn(cmd, args)
+    setTimeout((): void => {
+      t.kill()
+      reject(`\`timeout(cmd: '${cmd}', args: '${args}')\``)
+    }, 5000)
     const stdout: string[] = []
     const stderr: string[] = []
     if (t.stdout) {
