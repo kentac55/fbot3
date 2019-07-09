@@ -9,7 +9,13 @@ import pino from 'pino'
 
 import { EventKind, EmojiEventKind, FileType } from './kinds'
 import * as models from './models'
-import { ojichatCmd, reactionListCmd, helpCmd, versionCmd } from './cmd'
+import {
+  ojichatCmd,
+  niseCmd,
+  reactionListCmd,
+  helpCmd,
+  versionCmd,
+} from './cmd'
 import {
   ValidCommand,
   getVersion,
@@ -267,6 +273,9 @@ export const registerEventHandlers = (
           switch (cmd.cmd) {
             case 'ojichat': {
               return ojichatCmd(args, web, ev, me)
+            }
+            case 'nise': {
+              return niseCmd(args, ev)
             }
             case 'reaction': {
               return reactionListCmd(args, web, ev)

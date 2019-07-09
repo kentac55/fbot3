@@ -79,6 +79,28 @@ export const ojichatCmd = async (
   }
 }
 
+export const niseCmd = async (
+  args: string[],
+  ev: models.UserMessageEvent
+): Promise<ChatPostMessageArguments> => {
+  try {
+    const text = await exec('nise', args.slice(0, 1))
+    return {
+      text,
+      channel: ev.channel,
+      as_user: true,
+      link_names: true,
+    }
+  } catch (e) {
+    return {
+      text: e,
+      channel: ev.channel,
+      as_user: true,
+      link_names: true,
+    }
+  }
+}
+
 export const reactionListCmd = async (
   args: string[],
   web: WebClient,
@@ -186,6 +208,9 @@ export const helpCmd = async (
     '  $ ojichat [me/@target/rand]',
     '    summon Ojisan for [NPC(default), you, @target(NSFW), random member in this channel(NSFW)]',
     '    example: `ojicaht rand -c 100` => repeat ojichat(incl lottery) for random member 100 times',
+    '  $ nise str',
+    '    generate Chinese-like fake sentence',
+    '    example: `nise お腹減った`',
     '  $ reaction [@target] ',
     "    show user(default: you)'s reaction statistics from latest 100 usage",
     '  $ version show version',
