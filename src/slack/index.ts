@@ -304,6 +304,25 @@ export const registerEventHandlers = (
       })(cmd, ev).catch((e: Error): void => {
         _log.error(e)
       })
+    } else if (ev.user !== me.id) {
+      const replies = [
+        'せやな',
+        'わかる',
+        '確かに',
+        'たし蟹',
+        '蟹',
+        'それな',
+        'あー',
+        'なるほど',
+        ':crab:',
+      ]
+      const rand = Math.floor(Math.random() * Math.floor(replies.length))
+      web.chat.postMessage({
+        text: replies[rand],
+        channel: ev.channel,
+        as_user: true,
+        link_names: true,
+      })
     }
   })
 

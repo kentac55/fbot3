@@ -220,6 +220,7 @@ export const helpCmd = async (
     '  - notify channel event',
     '  - notify member join event',
     '  - notify member left event',
+    '  - response automatically',
     // '',
     // 'https://github.com/kentac55/fbot3',
     '```',
