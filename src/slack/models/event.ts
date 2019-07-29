@@ -140,6 +140,7 @@ export type UserMessageEvent = MessageEventCommon & {
   edited?: Edited
   icons?: { [k: string]: string }
   attachments?: MessageAttachment[]
+  thread_ts?: string
 }
 
 export type MessageEventWithSubtype = MessageEventCommon & {

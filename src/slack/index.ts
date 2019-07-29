@@ -322,6 +322,7 @@ export const registerEventHandlers = (
         channel: ev.channel,
         as_user: true,
         link_names: true,
+        thread_ts: ev.thread_ts,
       })
     }
   })
